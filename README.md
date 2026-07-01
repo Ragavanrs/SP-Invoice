@@ -3,7 +3,7 @@
 This repository now contains the initial split-architecture foundation:
 
 - `/surya-power-ui` — Next.js + TypeScript + Tailwind dashboard shell
-- `/surya-power-api` — Spring Boot 3.5 + Java 21 API foundation
+- `/surya-power-api` — Spring Boot 3.5 + Java 17 API foundation (Java 21-ready code style)
 
 ## Implemented baseline
 
@@ -27,20 +27,20 @@ This repository now contains the initial split-architecture foundation:
 
 ### UI
 ```bash
-cd /home/runner/work/SP-Invoice/SP-Invoice/surya-power-ui
+cd surya-power-ui
 npm install
 npm run dev
 ```
 
 ### API
 ```bash
-cd /home/runner/work/SP-Invoice/SP-Invoice/surya-power-api
+cd surya-power-api
 mvn spring-boot:run
 ```
 
 ## Tests
 
 ```bash
-cd /home/runner/work/SP-Invoice/SP-Invoice/surya-power-api
+cd surya-power-api
 mvn test
 ```

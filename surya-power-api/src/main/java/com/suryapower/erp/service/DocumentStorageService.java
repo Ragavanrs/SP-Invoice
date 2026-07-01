@@ -6,7 +6,6 @@ import com.suryapower.erp.storage.SupabaseStorageProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -24,18 +23,18 @@ public class DocumentStorageService {
     }
 
     String uploadWithRetry(String storagePath, byte[] pdfContent, int maxAttempts) {
-        int attempts = 0;
-        while (attempts < maxAttempts) {
+        RuntimeException lastException = null;
+        for (int attempts = 1; attempts <= maxAttempts; attempts++) {
             try {
                 return googleDriveStorageProvider.upload(storagePath, pdfContent);
             } catch (RuntimeException exception) {
-                attempts++;
-                if (attempts >= maxAttempts) {
-                    throw exception;
-                }
+                lastException = exception;
             }
         }
-        throw new IllegalStateException("Google Drive upload failed");
+        if (lastException != null) {
+            throw lastException;
+        }
+        throw new IllegalArgumentException("maxAttempts must be greater than zero");
     }
 
     private String checksum(byte[] pdfContent) {
