@@ -1,46 +1,36 @@
-# Surya Power ERP (SP-Invoice)
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This repository now contains the initial split-architecture foundation:
+## Getting Started
 
-- `/surya-power-ui` — Next.js + TypeScript + Tailwind dashboard shell
-- `/surya-power-api` — Spring Boot 3.5 + Java 17 API foundation (Java 21-ready code style)
+First, run the development server:
 
-## Implemented baseline
-
-### API
-- Clean package split (`config`, `controller`, `domain`, `service`, `storage`, `dto`)
-- JWT resource-server security baseline
-- Health endpoint: `GET /api/v1/health`
-- Document numbering format (e.g. `INV-2026-000021`)
-- Supabase path convention (e.g. `invoice/2026/07/INV-2026-000021.pdf`)
-- Google Drive path convention by year/month/type
-- Dual upload orchestration (Supabase + Google Drive) with 3-attempt retry for backup uploads
-- SHA-256 checksum generation for uploaded documents
-
-### UI
-- Responsive ERP dashboard shell
-- KPI cards and quick actions
-- Core module list for invoices, challans, quotations, AMC, customers, products, reports, audit logs
-- Light/dark mode compatible layout
-
-## Run locally
-
-### UI
 ```bash
-cd surya-power-ui
-npm install
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### API
-```bash
-cd surya-power-api
-mvn spring-boot:run
-```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Tests
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```bash
-cd surya-power-api
-mvn test
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
