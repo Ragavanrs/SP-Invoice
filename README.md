@@ -1,46 +1,42 @@
 # Surya Power ERP (SP-Invoice)
 
-This repository now contains the initial split-architecture foundation:
+SP-Invoice is now a **Next.js-only** application and is directly deployable on **Vercel**.
 
-- `/surya-power-ui` — Next.js + TypeScript + Tailwind dashboard shell
-- `/surya-power-api` — Spring Boot 3.5 + Java 17 API foundation (Java 21-ready code style)
+## Stack
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
 
-## Implemented baseline
-
-### API
-- Clean package split (`config`, `controller`, `domain`, `service`, `storage`, `dto`)
-- JWT resource-server security baseline
-- Health endpoint: `GET /api/v1/health`
-- Document numbering format (e.g. `INV-2026-000021`)
-- Supabase path convention (e.g. `invoice/2026/07/INV-2026-000021.pdf`)
-- Google Drive path convention by year/month/type
-- Dual upload orchestration (Supabase + Google Drive) with 3-attempt retry for backup uploads
-- SHA-256 checksum generation for uploaded documents
-
-### UI
-- Responsive ERP dashboard shell
-- KPI cards and quick actions
-- Core module list for invoices, challans, quotations, AMC, customers, products, reports, audit logs
-- Light/dark mode compatible layout
-
-## Run locally
-
-### UI
+## Local development
 ```bash
-cd surya-power-ui
 npm install
 npm run dev
 ```
 
-### API
+Open `http://localhost:3000`.
+
+## Build and lint
 ```bash
-cd surya-power-api
-mvn spring-boot:run
+npm run lint
+npm run build
 ```
 
-## Tests
+## API endpoint
+A built-in Next.js API route is available:
+- `GET /api/v1/health`
 
-```bash
-cd surya-power-api
-mvn test
+Example response:
+```json
+{
+  "status": "UP",
+  "service": "surya-power-next",
+  "timestamp": "2026-07-01T00:00:00.000Z"
+}
 ```
+
+## Deploy on Vercel
+This repository is ready for direct Vercel deployment:
+1. Import the GitHub repository in Vercel.
+2. Framework preset: **Next.js** (auto-detected).
+3. Keep default build settings.
+4. Deploy.
