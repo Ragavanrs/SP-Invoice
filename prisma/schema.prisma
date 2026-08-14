@@ -1,0 +1,281 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  ACCOUNTANT
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  APPROVED
+  REJECTED
+  CONVERTED
+}
+
+enum DeliveryStatus {
+  PENDING
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+enum EntityType {
+  QUOTATION
+  TAX_INVOICE
+  DELIVERY_CHALLAN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(STAFF)
+  phone     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Customer {
+  id              String   @id @default(uuid())
+  companyName     String
+  gstin           String?  @unique
+  pan             String?
+  address         String
+  shippingAddress String?
+  contactPerson   String?
+  phone           String
+  email           String?
+  state           String   @default("Tamil Nadu")
+  stateCode       String   @default("33")
+  placeOfSupply   String   @default("Tamil Nadu (33)")
+  status          String   @default("ACTIVE")
+  remarks         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  quotations       Quotation[]
+  taxInvoices      TaxInvoice[]
+  deliveryChallans DeliveryChallan[]
+
+  @@map("customers")
+}
+
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  dgBrand          String?
+  engineBrand      String?
+  alternatorBrand  String?
+  model            String?
+  serialNumber     String?
+  engineNumber     String?
+  alternatorNumber String?
+  kva              Float?
+  fuelType         String?  @default("Diesel")
+  purchaseCost     Float    @default(0.0)
+  sellingPrice     Float    @default(0.0)
+  gstPercentage    Float    @default(18.0)
+  hsnCode          String   @default("8502")
+  description      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("products")
+}
+
+model DocumentSequence {
+  id         String   @id @default(uuid())
+  prefix     String   // e.g. "QT", "INV", "DC"
+  year       Int      // e.g. 2026
+  currentSeq Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([prefix, year])
+  @@map("document_sequences")
+}
+
+model Quotation {
+  id                   String          @id @default(uuid())
+  quotationNo          String          @unique // QT-2026-000001
+  customerId           String
+  customer             Customer        @relation(fields: [customerId], references: [id])
+  date                 DateTime        @default(now())
+  validUntil           DateTime
+  subTotal             Float
+  discount             Float           @default(0.0)
+  taxableAmount        Float
+  cgst                 Float           @default(0.0)
+  sgst                 Float           @default(0.0)
+  igst                 Float           @default(0.0)
+  roundOff             Float           @default(0.0)
+  grandTotal           Float
+  status               QuotationStatus @default(DRAFT)
+  terms                String?
+  notes                String?
+  preparedBy           String?
+  approvedBy           String?
+  convertedToInvoiceNo String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  items QuotationItem[]
+
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id            String    @id @default(uuid())
+  quotationId   String
+  quotation     Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  description   String
+  hsnCode       String    @default("8502")
+  quantity      Float     @default(1.0)
+  unit          String    @default("NOS")
+  rate          Float
+  discount      Float     @default(0.0)
+  gstPercentage Float     @default(18.0)
+  amount        Float
+
+  @@map("quotation_items")
+}
+
+model TaxInvoice {
+  id                String        @id @default(uuid())
+  invoiceNo         String        @unique // INV-2026-000001
+  invoiceDate       DateTime      @default(now())
+  customerId        String
+  customer          Customer      @relation(fields: [customerId], references: [id])
+  gstin             String?
+  billingAddress    String
+  shippingAddress   String?
+  poNumber          String?
+  deliveryChallanNo String?
+  vehicleNumber     String?
+  subTotal          Float
+  discount          Float         @default(0.0)
+  taxableAmount     Float
+  cgstRate          Float         @default(9.0)
+  cgstAmount        Float         @default(0.0)
+  sgstRate          Float         @default(9.0)
+  sgstAmount        Float         @default(0.0)
+  igstRate          Float         @default(0.0)
+  igstAmount        Float         @default(0.0)
+  roundOff          Float         @default(0.0)
+  grandTotal        Float
+  paymentStatus     PaymentStatus @default(PENDING)
+  paymentMode       String?       @default("Cheque/NEFT")
+  bankDetails       String?
+  terms             String?
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  items InvoiceItem[]
+
+  @@map("tax_invoices")
+}
+
+model InvoiceItem {
+  id            String     @id @default(uuid())
+  taxInvoiceId  String
+  taxInvoice    TaxInvoice @relation(fields: [taxInvoiceId], references: [id], onDelete: Cascade)
+  description   String
+  hsnCode       String     @default("8502")
+  quantity      Float      @default(1.0)
+  unit          String     @default("NOS")
+  rate          Float
+  discount      Float      @default(0.0)
+  gstPercentage Float      @default(18.0)
+  amount        Float
+
+  @@map("invoice_items")
+}
+
+model DeliveryChallan {
+  id            String         @id @default(uuid())
+  challanNo     String         @unique // DC-2026-000001
+  date          DateTime       @default(now())
+  customerId    String
+  customer      Customer        @relation(fields: [customerId], references: [id])
+  vehicleNumber String?
+  driverName    String?
+  dispatchTime  String?
+  status        DeliveryStatus @default(DISPATCHED)
+  remarks       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  items DeliveryItem[]
+
+  @@map("delivery_challans")
+}
+
+model DeliveryItem {
+  id                String          @id @default(uuid())
+  deliveryChallanId String
+  deliveryChallan   DeliveryChallan @relation(fields: [deliveryChallanId], references: [id], onDelete: Cascade)
+  particulars       String
+  hsnCode           String          @default("8502")
+  quantity          Float           @default(1.0)
+  unit              String          @default("NOS")
+  remarks           String?
+
+  @@map("delivery_items")
+}
+
+model DriveDocument {
+  id           String     @id @default(uuid())
+  entityType   EntityType
+  entityId     String
+  documentNo   String
+  driveFileId  String?
+  driveUrl     String?
+  folderName   String     // "Quotations", "Tax Invoices", "Delivery Challans"
+  fileName     String
+  mimeType     String     @default("application/pdf")
+  fileSize     Int        @default(0)
+  uploadStatus String     @default("SUCCESS") // "SUCCESS", "PENDING", "FAILED"
+  errorMsg     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([entityType, entityId])
+  @@map("drive_documents")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  entityName  String
+  entityId    String?
+  action      String   // "CREATE", "UPDATE", "DELETE", "PDF_GENERATE", "DRIVE_UPLOAD"
+  performedBy String
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  details     String?
+  createdAt   DateTime @default(now())
+
+  @@map("audit_logs")
+}
